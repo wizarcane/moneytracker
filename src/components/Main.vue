@@ -21,7 +21,7 @@
       <button class="ui positive button" type="submit" @click="addTransaction()">Submit</button>
     </form>
     <!-- table -->
-    <table class="ui celled table">
+    <table class="ui celled compact table">
       <thead>
         <tr>
           <th class="three wide">Date</th>
@@ -30,7 +30,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(transaction, key) in transactions" :key="key">
+        <tr v-for="(transaction, key) in transactionsForSelectedMonth" :key="key">
           <td class="three wide">{{ transaction.date }}</td>
           <td>{{ transaction.description }}</td>
           <td class="right aligned three wide">
@@ -43,30 +43,30 @@
       <tfoot>
         <tr>
           <th></th>
-          <th style="text-align: right;">Total</th>
+          <th style="text-align: right;">Month's Total</th>
+          <th style="text-align: right;">{{ totalForSelectedMonth | currencyFormat }}</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th style="text-align: right;">Year-to-Date Total</th>
           <th style="text-align: right;">{{ totalYearToDate | currencyFormat }}</th>
         </tr>
-        <!--<tr>-->
-          <!--<th colspan="3">-->
-            <!--<div class="ui right floated pagination menu">-->
-
-              <!--&lt;!&ndash;<a class="icon item">&ndash;&gt;-->
-              <!--&lt;!&ndash;<i class="left chevron icon"></i>&ndash;&gt;-->
-              <!--&lt;!&ndash;</a>&ndash;&gt;-->
-              <!--&lt;!&ndash;<a class="item">1</a>&ndash;&gt;-->
-              <!--&lt;!&ndash;<a class="item">2</a>&ndash;&gt;-->
-              <!--&lt;!&ndash;<a class="item">3</a>&ndash;&gt;-->
-              <!--&lt;!&ndash;<a class="item">4</a>&ndash;&gt;-->
-              <!--&lt;!&ndash;<a class="icon item">&ndash;&gt;-->
-              <!--&lt;!&ndash;<i class="right chevron icon"></i>&ndash;&gt;-->
-              <!--&lt;!&ndash;</a>&ndash;&gt;-->
-            <!--</div>-->
-          <!--</th>-->
-        <!--</tr>-->
+        <tr>
+          <th colspan="3">
+            <div class="ui right floated pagination menu">
+              <a v-for="(yearMonth, key) in Object.keys(monthlyTotals)" :key="key" class="item"
+                v-bind:class="{active: yearMonth === selectedMonth}"
+                @click="updateMonth(yearMonth)">{{ yearMonth }}</a>
+              <!--<a class="icon item">-->
+              <!--<i class="right chevron icon"></i>-->
+              <!--</a>-->
+            </div>
+          </th>
+        </tr>
       </tfoot>
     </table>
     <div>
-      {{ totalsPerMonth }}
+      {{ monthlyTotals }}
     </div>
   </div>
 </template>
@@ -90,16 +90,19 @@ export default {
     }
   },
   computed: {
-    ...mapState('transactions', ['transactions', 'transaction', 'totalYearToDate']),
+    ...mapState('transactions', ['transactions', 'transaction', 'totalYearToDate', 'selectedMonth']),
     ...mapGetters({
       totalYearToDate: 'transactions/totalYearToDate',
-      totalsPerMonth: 'transactions/totalsPerMonth'
+      monthlyTotals: 'transactions/monthlyTotals',
+      totalForSelectedMonth: 'transactions/totalForSelectedMonth',
+      transactionsForSelectedMonth: 'transactions/transactionsForSelectedMonth'
     })
   },
   methods: {
     ...mapMutations({
       addTransaction: 'transactions/add',
-      updateField: 'transactions/' + Mutations.UPDATE_FIELD
+      updateField: 'transactions/' + Mutations.UPDATE_FIELD,
+      setMonth: 'transactions/' + Mutations.SET_MONTH
     }),
     updateDate (date) {
       this.updateField({key: 'date', value: moment(date).format('YYYY-MM-DD')})
@@ -114,6 +117,9 @@ export default {
     updateOperation (operation) {
       this.operation = operation
       this.updateAmount(this.transaction.amount)
+    },
+    updateMonth (value) {
+      this.setMonth(value)
     }
   },
   filters: {

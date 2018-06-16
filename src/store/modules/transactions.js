@@ -29,7 +29,7 @@ function round (number, precision) {
   return shift(Math.round(shift(number, precision, false)), precision, true)
 }
 
-function monthlyTotals (objectArray, property) {
+function getTotalsPerMonth (objectArray, property) {
   return _.transform(objectArray, function (result, obj) {
     let date = obj[property]
     let key = date.substring(0, date.lastIndexOf('-'))
@@ -59,12 +59,21 @@ const state = {
     'id506': {'date': '2018-06-13', 'description': 'Dinner', 'amount': '-110'},
     'id507': {'date': '2018-06-13', 'description': 'Tricycle', 'amount': '-25'},
     'id508': {'date': '2018-06-13', 'description': 'Drink', 'amount': '-90'}
-  }
+  },
+  selectedMonth: null
 }
 
 const actions = {}
 
 const getters = {
+  transactionsForSelectedMonth: (state, getters) => {
+    const selectedMonth = state.selectedMonth
+    if (selectedMonth == null) return []
+    return _.pickBy(state.transactions, function (object) {
+      const date = object.date
+      return date.substring(0, date.lastIndexOf('-')) === selectedMonth
+    })
+  },
   totalYearToDate: state => {
     const result = _.transform(state.transactions, function (result, value, id) {
       result[0] = round(Number(result) + Number(value.amount), 2)
@@ -72,8 +81,12 @@ const getters = {
 
     return round(result[0], 2)
   },
-  totalsPerMonth: state => {
-    return monthlyTotals(state.transactions, 'date')
+  monthlyTotals: state => {
+    return getTotalsPerMonth(state.transactions, 'date')
+  },
+  totalForSelectedMonth: (state, getters) => {
+    const monthlyTotals = getters.monthlyTotals
+    return Object.keys(monthlyTotals).length > 0 ? monthlyTotals[state.selectedMonth] : 0
   }
 }
 
@@ -84,6 +97,9 @@ const mutations = {
   },
   [Mutations.UPDATE_FIELD] (state, {key, value}) {
     Vue.set(state.transaction, key, value)
+  },
+  [Mutations.SET_MONTH] (state, value) {
+    Vue.set(state, 'selectedMonth', value)
   }
 }
 
