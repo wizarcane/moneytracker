@@ -15,7 +15,7 @@
         <input type="text" placeholder="Description" v-model="transaction.description">
       </div>
 
-      <datepicker :value="transaction.dateMillis" @selected="date => transaction.dateMillis = date.getTime()" format="MMMM dd, yyyy"></datepicker>
+      <datepicker :value="transaction.date" @selected="updateDate" format="MMMM dd, yyyy"/>
       <button class="ui positive button" type="submit" @click="addTransaction()">Submit</button>
     </form>
     <!-- table -->
@@ -28,8 +28,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(transaction, index) in transactions" :key="index">
-          <td class="three wide">{{ transaction.dateMillis | formatDate }}</td>
+        <tr v-for="(transaction, key) in transactions" :key="key">
+          <td class="three wide">{{ transaction.date }}</td>
           <td>{{ transaction.description }}</td>
           <td class="right aligned three wide">
             <span :style=" transaction.transaction === 'subtract' ? 'color:red' : 'color:green'">
@@ -66,6 +66,8 @@ import { mapState, mapMutations } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'
 
+import { Mutations } from '../store/mutations'
+
 export default {
   name: 'Main',
   components: { Datepicker },
@@ -78,13 +80,14 @@ export default {
   },
   methods: {
     ...mapMutations({
-      addTransaction: 'transactions/add'
-    })
+      addTransaction: 'transactions/add',
+      updateField: 'transactions/' + Mutations.UPDATE_FIELD
+    }),
+    updateDate (date) {
+      this.updateField({key: 'date', value: moment(date).format('YYYY-MM-DD')})
+    }
   },
   filters: {
-    formatDate: function (value) {
-      return moment(value).format('YYYY-MM-DD')
-    },
     currencyFormat (amount) {
       if (amount == null) return '₱ 0.00'
       return '₱ ' + parseFloat(amount).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
