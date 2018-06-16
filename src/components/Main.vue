@@ -38,30 +38,36 @@
           </td>
         </tr>
       </tbody>
-      <!--<tfoot>-->
+      <tfoot>
+        <tr>
+          <th></th>
+          <th style="text-align: right;">Total</th>
+          <th style="text-align: right;">{{ totalYearToDate | currencyFormat }}</th>
+        </tr>
         <!--<tr>-->
           <!--<th colspan="3">-->
-          <!--<div class="ui right floated pagination menu">-->
-            <!--<a class="icon item">-->
-              <!--<i class="left chevron icon"></i>-->
-            <!--</a>-->
-            <!--<a class="item">1</a>-->
-            <!--<a class="item">2</a>-->
-            <!--<a class="item">3</a>-->
-            <!--<a class="item">4</a>-->
-            <!--<a class="icon item">-->
-              <!--<i class="right chevron icon"></i>-->
-            <!--</a>-->
-          <!--</div>-->
-        <!--</th>-->
+            <!--<div class="ui right floated pagination menu">-->
+
+              <!--&lt;!&ndash;<a class="icon item">&ndash;&gt;-->
+              <!--&lt;!&ndash;<i class="left chevron icon"></i>&ndash;&gt;-->
+              <!--&lt;!&ndash;</a>&ndash;&gt;-->
+              <!--&lt;!&ndash;<a class="item">1</a>&ndash;&gt;-->
+              <!--&lt;!&ndash;<a class="item">2</a>&ndash;&gt;-->
+              <!--&lt;!&ndash;<a class="item">3</a>&ndash;&gt;-->
+              <!--&lt;!&ndash;<a class="item">4</a>&ndash;&gt;-->
+              <!--&lt;!&ndash;<a class="icon item">&ndash;&gt;-->
+              <!--&lt;!&ndash;<i class="right chevron icon"></i>&ndash;&gt;-->
+              <!--&lt;!&ndash;</a>&ndash;&gt;-->
+            <!--</div>-->
+          <!--</th>-->
         <!--</tr>-->
-      <!--</tfoot>-->
+      </tfoot>
     </table>
   </div>
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 
 import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'
@@ -76,7 +82,10 @@ export default {
     }
   },
   computed: {
-    ...mapState('transactions', ['transactions', 'transaction'])
+    ...mapState('transactions', ['transactions', 'transaction', 'totalYearToDate']),
+    ...mapGetters({
+      totalYearToDate: 'transactions/totalYearToDate'
+    })
   },
   methods: {
     ...mapMutations({
