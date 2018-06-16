@@ -65,6 +65,9 @@
         <!--</tr>-->
       </tfoot>
     </table>
+    <div>
+      {{ totalsPerMonth }}
+    </div>
   </div>
 </template>
 
@@ -89,7 +92,8 @@ export default {
   computed: {
     ...mapState('transactions', ['transactions', 'transaction', 'totalYearToDate']),
     ...mapGetters({
-      totalYearToDate: 'transactions/totalYearToDate'
+      totalYearToDate: 'transactions/totalYearToDate',
+      totalsPerMonth: 'transactions/totalsPerMonth'
     })
   },
   methods: {

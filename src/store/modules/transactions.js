@@ -29,39 +29,36 @@ function round (number, precision) {
   return shift(Math.round(shift(number, precision, false)), precision, true)
 }
 
+function monthlyTotals (objectArray, property) {
+  return _.transform(objectArray, function (result, obj) {
+    let date = obj[property]
+    let key = date.substring(0, date.lastIndexOf('-'))
+    if (!result[key]) {
+      result[key] = []
+    }
+    result[key] = round(Number(result[key]) + Number(obj.amount), 2)
+  }, {})
+}
+
 const state = {
   transaction: Object.assign({}, getBlankItem()),
   transactions: {
-    'id0': {
-      amount: -1.00,
-      description: 'Spend 1',
-      date: '2018-04-24'
-    },
-    'id1': {
-      amount: -2.00,
-      description: 'Spend 2',
-      date: '2018-04-25'
-    },
-    'id2': {
-      amount: -3.00,
-      description: 'Spend 3',
-      date: '2018-05-01'
-    },
-    'id3': {
-      amount: 4.00,
-      description: 'Add 4',
-      date: '2018-05-02'
-    },
-    'id4': {
-      amount: -5.00,
-      description: 'Spend 5',
-      date: '2018-05-03'
-    },
-    'id5': {
-      amount: -6.00,
-      description: 'Spend 6',
-      date: '2018-06-01'
-    }
+    'id2': {'date': '2018-01-01', 'description': 'Bus', 'amount': '-36'},
+    'id3': {'date': '2018-01-01', 'description': 'Grocery', 'amount': '-212.09'},
+    'id138': {'date': '2018-02-07', 'description': 'Tricycle', 'amount': '-14'},
+    'id139': {'date': '2018-02-07', 'description': 'Lunch', 'amount': '-60'},
+    'id167': {'date': '2018-02-15', 'description': 'Salary', 'amount': '16459.83'},
+    'id168': {'date': '2018-02-15', 'description': 'Cheese', 'amount': '-25.5'},
+    'id236': {'date': '2018-03-06', 'description': 'Tricycle', 'amount': '-48'},
+    'id237': {'date': '2018-03-06', 'description': 'Lunch', 'amount': '-60'},
+    'id239': {'date': '2018-03-07', 'description': 'Breakfast', 'amount': '-270'},
+    'id380': {'date': '2018-04-18', 'description': 'Brunch', 'amount': '-147'},
+    'id381': {'date': '2018-04-19', 'description': 'Lunch', 'amount': '-60'},
+    'id433': {'date': '2018-05-10', 'description': 'Lunch', 'amount': '-60'},
+    'id434': {'date': '2018-05-11', 'description': 'Drink', 'amount': '-20.25'},
+    'id506': {'date': '2018-06-13', 'description': 'Dinner', 'amount': '-110'},
+    'id507': {'date': '2018-06-13', 'description': 'Tricycle', 'amount': '-25'},
+    'id508': {'date': '2018-06-13', 'description': 'Drink', 'amount': '-90'}
   }
 }
 
@@ -70,11 +67,13 @@ const actions = {}
 const getters = {
   totalYearToDate: state => {
     const result = _.transform(state.transactions, function (result, value, id) {
-      console.log(result, value, id, value.amount)
       result[0] = round(Number(result) + Number(value.amount), 2)
     }, [])
 
     return round(result[0], 2)
+  },
+  totalsPerMonth: state => {
+    return monthlyTotals(state.transactions, 'date')
   }
 }
 
