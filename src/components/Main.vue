@@ -9,7 +9,7 @@
           <button class="ui button" :class="{negative: transaction.transaction === 'subtract'}"
                   @click="transaction.transaction = 'subtract'">-</button>
         </div>
-        <input type="text" placeholder="Amount" v-model="transaction.amount">
+        <input type="text" style="text-align: right;" placeholder="Amount" v-model="transaction.amount">
       </div>
       <div class="field">
         <input type="text" placeholder="Description" v-model="transaction.description">
@@ -18,9 +18,45 @@
       <datepicker :value="transaction.dateMillis" @selected="date => transaction.dateMillis = date.getTime()" format="MMMM dd, yyyy"></datepicker>
       <button class="ui positive button" type="submit" @click="addTransaction()">Submit</button>
     </form>
-    <div v-for="(transaction, index) in transactions" :key="index">
-      {{transaction}}
-    </div>
+    <!-- table -->
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th class="three wide">Date</th>
+          <th>Description</th>
+          <th class="three wide">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(transaction, index) in transactions" :key="index">
+          <td class="three wide">{{ transaction.dateMillis | formatDate }}</td>
+          <td>{{ transaction.description }}</td>
+          <td class="right aligned three wide">
+            <span :style=" transaction.transaction === 'subtract' ? 'color:red' : 'color:green'">
+              {{ transaction.amount | currencyFormat }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+      <!--<tfoot>-->
+        <!--<tr>-->
+          <!--<th colspan="3">-->
+          <!--<div class="ui right floated pagination menu">-->
+            <!--<a class="icon item">-->
+              <!--<i class="left chevron icon"></i>-->
+            <!--</a>-->
+            <!--<a class="item">1</a>-->
+            <!--<a class="item">2</a>-->
+            <!--<a class="item">3</a>-->
+            <!--<a class="item">4</a>-->
+            <!--<a class="icon item">-->
+              <!--<i class="right chevron icon"></i>-->
+            <!--</a>-->
+          <!--</div>-->
+        <!--</th>-->
+        <!--</tr>-->
+      <!--</tfoot>-->
+    </table>
   </div>
 </template>
 
@@ -28,32 +64,30 @@
 import { mapState, mapMutations } from 'vuex'
 
 import Datepicker from 'vuejs-datepicker'
+import moment from 'moment'
 
 export default {
   name: 'Main',
   components: { Datepicker },
   data () {
     return {
-      dateMillis: Date.now()
     }
   },
   computed: {
-    ...mapState('transactions', ['transactions', 'transaction']),
-    date: {
-      get () {
-        return this.dateMillis
-      },
-      set (strDate) {
-        this.dateMillis = new Date(strDate)
-      }
-    }
+    ...mapState('transactions', ['transactions', 'transaction'])
   },
   methods: {
     ...mapMutations({
       addTransaction: 'transactions/add'
-    }),
-    test (output) {
-      console.log('new date', output.getTime())
+    })
+  },
+  filters: {
+    formatDate: function (value) {
+      return moment(value).format('YYYY-MM-DD')
+    },
+    currencyFormat (amount) {
+      if (amount == null) return '₱ 0.00'
+      return '₱ ' + parseFloat(amount).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
     }
   }
 }
