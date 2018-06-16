@@ -3,13 +3,15 @@
     <form class="ui form">
       <div class="fields">
         <div class="ui buttons">
-          <button class="ui button" :class="{positive: transaction.transaction === 'add'}"
-                  @click="transaction.transaction = 'add'">+</button>
+          <button class="ui button" :class="{positive: operation === '+'}"
+                  @click="updateOperation('+')">+</button>
           <div class="or"></div>
-          <button class="ui button" :class="{negative: transaction.transaction === 'subtract'}"
-                  @click="transaction.transaction = 'subtract'">-</button>
+          <button class="ui button" :class="{negative: operation === '-'}"
+                  @click="updateOperation('-')">-</button>
         </div>
-        <input type="text" style="text-align: right;" placeholder="Amount" v-model="transaction.amount">
+        <input type="text" style="text-align: right;" placeholder="Amount"
+               :value="Math.abs(transaction.amount)"
+               @keyup="event => updateAmount(event.target.value)">
       </div>
       <div class="field">
         <input type="text" placeholder="Description" v-model="transaction.description">
@@ -32,7 +34,7 @@
           <td class="three wide">{{ transaction.date }}</td>
           <td>{{ transaction.description }}</td>
           <td class="right aligned three wide">
-            <span :style=" transaction.transaction === 'subtract' ? 'color:red' : 'color:green'">
+            <span :style=" transaction.amount < 0 ? 'color:red' : 'color:green'">
               {{ transaction.amount | currencyFormat }}
             </span>
           </td>
@@ -72,13 +74,16 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'
 
+// import { Actions } from '../store/actions'
 import { Mutations } from '../store/mutations'
+import { Operation } from '../Constants'
 
 export default {
   name: 'Main',
   components: { Datepicker },
   data () {
     return {
+      operation: Operation.SUBTRACT
     }
   },
   computed: {
@@ -94,6 +99,17 @@ export default {
     }),
     updateDate (date) {
       this.updateField({key: 'date', value: moment(date).format('YYYY-MM-DD')})
+    },
+    updateAmount (value) {
+      if (this.operation === Operation.ADD) {
+        this.updateField({key: 'amount', value: Math.abs(value)})
+      } else {
+        this.updateField({key: 'amount', value: (-1.00 * Math.abs(value))})
+      }
+    },
+    updateOperation (operation) {
+      this.operation = operation
+      this.updateAmount(this.transaction.amount)
     }
   },
   filters: {
