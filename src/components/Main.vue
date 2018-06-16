@@ -1,42 +1,59 @@
 <template>
-  <form class="ui form">
-    <div class="fields">
-      <div class="ui buttons">
-        <button class="ui button" :class="{positive: transaction === 'add'}"
-                @click="setTransaction('add')">+</button>
-        <div class="or"></div>
-        <button class="ui button" :class="{negative: transaction === 'subtract'}"
-                @click="setTransaction('subtract')">-</button>
+  <div>
+    <form class="ui form">
+      <div class="fields">
+        <div class="ui buttons">
+          <button class="ui button" :class="{positive: transaction.transaction === 'add'}"
+                  @click="transaction.transaction = 'add'">+</button>
+          <div class="or"></div>
+          <button class="ui button" :class="{negative: transaction.transaction === 'subtract'}"
+                  @click="transaction.transaction = 'subtract'">-</button>
+        </div>
+        <input type="text" placeholder="Amount" v-model="transaction.amount">
       </div>
-      <input type="text" placeholder="Amount" v-model="amount">
+      <div class="field">
+        <input type="text" placeholder="Description" v-model="transaction.description">
+      </div>
+
+      <datepicker :value="transaction.dateMillis" @selected="date => transaction.dateMillis = date.getTime()" format="MMMM dd, yyyy"></datepicker>
+      <button class="ui positive button" type="submit" @click="addTransaction()">Submit</button>
+    </form>
+    <div v-for="(transaction, index) in transactions" :key="index">
+      {{transaction}}
     </div>
-    <div class="field">
-      <input type="text" placeholder="Description" v-model="description">
-    </div>
-    <div class="field">
-      <input type="text" placeholder="Date" v-model="date">
-    </div>
-    <button class="ui positive button" type="submit">Submit</button>
-  </form>
+  </div>
 </template>
 
 <script>
-const constants = {}
-constants.Transaction = {TRANSACTION_ADD: 'add', TRANSACTION_SUBSTRACT: 'subtract'}
+import { mapState, mapMutations } from 'vuex'
+
+import Datepicker from 'vuejs-datepicker'
 
 export default {
   name: 'Main',
+  components: { Datepicker },
   data () {
     return {
-      transaction: constants.Transaction.TRANSACTION_SUBSTRACT,
-      amount: 0.00,
-      description: 'hi',
-      date: 'hello'
+      dateMillis: Date.now()
+    }
+  },
+  computed: {
+    ...mapState('transactions', ['transactions', 'transaction']),
+    date: {
+      get () {
+        return this.dateMillis
+      },
+      set (strDate) {
+        this.dateMillis = new Date(strDate)
+      }
     }
   },
   methods: {
-    setTransaction (value) {
-      this.transaction = value
+    ...mapMutations({
+      addTransaction: 'transactions/add'
+    }),
+    test (output) {
+      console.log('new date', output.getTime())
     }
   }
 }
