@@ -92,11 +92,14 @@ const getters = {
 
 const mutations = {
   [Actions.ADD] (state) {
-    Vue.set(state.transactions, 'id' + Object.keys(state.transactions).length, Object.assign({}, state.transaction))
+    Vue.set(state.transactions, 'id' + Object.keys(state.transactions).length+1, Object.assign({}, state.transaction))
     state.transaction = Object.assign({}, getBlankItem())
   },
   [Mutations.UPDATE_FIELD] (state, {key, value}) {
     Vue.set(state.transaction, key, value)
+  },
+  [Mutations.DELETE] (state, key) {
+    Vue.delete(state.transactions, key)
   },
   [Mutations.SET_MONTH] (state, value) {
     Vue.set(state, 'selectedMonth', value)
